@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PhotoWeather</string>
+    <string name="capture_fab_content_description">Take a photo</string>
 </resources>
