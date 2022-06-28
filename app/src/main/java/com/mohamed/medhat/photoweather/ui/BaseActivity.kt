@@ -16,6 +16,7 @@ const val REQUEST_PERMISSIONS_REQUEST_CODE = 2
 open class BaseActivity : AppCompatActivity() {
 
     private var onPermissionsGranted = {}
+    private var onPermissionsDenied = {}
     private val displayedDialogs = mutableListOf<AlertDialog>()
 
     /**
@@ -23,13 +24,16 @@ open class BaseActivity : AppCompatActivity() {
      * @param permissions The required permissions to execute the code.
      * @param permissionsFriendlyNames Permission names that will be displayed to the user.
      * @param onPermissionsGranted The code to execute when the permissions are granted.
+     * @param onPermissionsDenied The code to execute when the permissions are denied.
      */
     fun requirePermissions(
         permissions: Array<String>,
         permissionsFriendlyNames: Array<String>,
-        onPermissionsGranted: () -> Unit
+        onPermissionsGranted: () -> Unit,
+        onPermissionsDenied: () -> Unit = {}
     ) {
         this.onPermissionsGranted = onPermissionsGranted
+        this.onPermissionsDenied = onPermissionsDenied
         val friendlyNamesBuilder = StringBuilder().apply {
             permissionsFriendlyNames.forEachIndexed { index, s ->
                 append(s)
@@ -55,6 +59,9 @@ open class BaseActivity : AppCompatActivity() {
                     negativeButtonLabel = getString(R.string.requesting_permissions_cancel),
                     onPositiveButtonClicked = {
                         requestPermissions(permissions)
+                    },
+                    onNegativeButtonClicked = {
+                        onPermissionsDenied.invoke()
                     }
                 )
             }
@@ -90,6 +97,7 @@ open class BaseActivity : AppCompatActivity() {
         onNegativeButtonClicked: () -> Unit = {}
     ) {
         val dialog = AlertDialog.Builder(this)
+            .setCancelable(false)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(positiveButtonLabel) { d, _ ->
@@ -120,7 +128,10 @@ open class BaseActivity : AppCompatActivity() {
                 showAlertDialog(
                     title = getString(R.string.permission_denied_title),
                     message = getString(R.string.permission_denied_message),
-                    positiveButtonLabel = getString(R.string.permissions_denied_ok)
+                    positiveButtonLabel = getString(R.string.permissions_denied_ok),
+                    onPositiveButtonClicked = {
+                        onPermissionsDenied.invoke()
+                    }
                 )
             }
         }
