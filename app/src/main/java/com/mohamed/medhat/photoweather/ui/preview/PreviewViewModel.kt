@@ -2,9 +2,12 @@ package com.mohamed.medhat.photoweather.ui.preview
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.location.LocationManager
+import android.net.Uri
 import android.util.Log
+import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,7 +23,10 @@ import com.mohamed.medhat.photoweather.utils.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
+
 
 private const val TAG = "PreviewViewModel"
 
@@ -43,11 +49,23 @@ class PreviewViewModel @Inject constructor(
     // Introduced to prevent the activity from automatically open the location settings on each configuration change
     var shouldOpenLocationSettings = false
 
+    // Introduced to prevent the activity from automatically sharing the image
+    var canShareImage = false
+
+    // Introduced to prevent the activity from automatically showing a toast
+    var canShowToast = false
+
     private val _state = MutableLiveData<StateHolder>()
     val state: LiveData<StateHolder> = _state
 
     private val _bitmap = MutableLiveData<Bitmap>()
     val bitmap: LiveData<Bitmap> = _bitmap
+
+    private val _shareIntent = MutableLiveData<Pair<Intent, Uri>>()
+    val shareIntent: LiveData<Pair<Intent, Uri>> = _shareIntent
+
+    private val _toastMessage = MutableLiveData<String>()
+    val toastMessage: LiveData<String> = _toastMessage
 
     /**
      * Adds a weather banner overlay to the image whose path is passed to this function.
@@ -107,5 +125,32 @@ class PreviewViewModel @Inject constructor(
      */
     fun announceErrorState(message: String) {
         _state.postValue(StateHolder(State.STATE_ERROR, message))
+    }
+
+    /**
+     * Shares the modified image.
+     * @param imagePath The old image path to replace.
+     */
+    fun shareImage(imagePath: String) {
+        val photoFile = File(imagePath)
+        val outputStream = FileOutputStream(photoFile)
+        if (bitmap.value?.compress(Bitmap.CompressFormat.PNG, 100, outputStream) == true) {
+            // TODO save the image in the history.
+            canShareImage = true
+            val photoURI =
+                FileProvider.getUriForFile(
+                    context,
+                    "com.mohamed.medhat.photoweather.fileprovider",
+                    photoFile
+                )
+            val intent = Intent()
+            intent.action = Intent.ACTION_SEND
+            intent.type = "image/*"
+            intent.putExtra(Intent.EXTRA_STREAM, photoURI)
+            _shareIntent.postValue(Pair(intent, photoURI))
+        } else {
+            canShowToast = true
+            _toastMessage.postValue(context.getString(R.string.share_image_error))
+        }
     }
 }

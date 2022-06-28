@@ -2,6 +2,7 @@ package com.mohamed.medhat.photoweather.ui.preview
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
@@ -14,6 +15,7 @@ import com.mohamed.medhat.photoweather.ui.BaseActivity
 import com.mohamed.medhat.photoweather.ui.main.IMAGE_PATH
 import com.mohamed.medhat.photoweather.utils.State.*
 import dagger.hilt.android.AndroidEntryPoint
+
 
 /**
  * The activity where the user can preview the image to share.
@@ -42,7 +44,9 @@ class PreviewActivity : BaseActivity() {
             addWeatherBanner()
         }
         binding.btnPreviewShare.setOnClickListener {
-            // TODO
+            withImagePath {
+                previewViewModel.shareImage(it)
+            }
         }
     }
 
@@ -100,6 +104,31 @@ class PreviewActivity : BaseActivity() {
                         pbPreviewLoading.visibility = View.INVISIBLE
                     }
                 }
+            }
+        }
+        previewViewModel.shareIntent.observe(this) {
+            if (previewViewModel.canShareImage) {
+                previewViewModel.canShareImage = false
+                val shareIntent = Intent.createChooser(it.first, "Share Image")
+                val resInfoList = packageManager.queryIntentActivities(
+                    shareIntent,
+                    PackageManager.MATCH_ALL
+                )
+                for (resolveInfo in resInfoList) {
+                    val packageName = resolveInfo.activityInfo.packageName
+                    grantUriPermission(
+                        packageName,
+                        it.second,
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                }
+                startActivity(shareIntent)
+            }
+        }
+        previewViewModel.toastMessage.observe(this) {
+            if (previewViewModel.canShowToast) {
+                previewViewModel.canShowToast = false
+                showToast(it)
             }
         }
     }
