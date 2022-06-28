@@ -19,4 +19,5 @@
     <string name="weather_response_error">Something went wrong while getting weather data!</string>
     <string name="button_share">Share</string>
     <string name="button_retry">Retry</string>
+    <string name="share_image_error">Something went wrong!</string>
 </resources>
