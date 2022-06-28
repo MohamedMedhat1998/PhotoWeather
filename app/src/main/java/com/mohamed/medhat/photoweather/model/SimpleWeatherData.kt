@@ -19,9 +19,7 @@ data class SimpleWeatherData(
 
 data class Main(
 	@field:SerializedName("temp")
-	val temp: Double,
-	@field:SerializedName("feels_like")
-	val feelsLike: Double
+	val temp: Double
 )
 
 

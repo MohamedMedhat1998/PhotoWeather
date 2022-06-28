@@ -6,8 +6,6 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.mohamed.medhat.photoweather.R
 import com.mohamed.medhat.photoweather.databinding.ActivityPreviewBinding
 import com.mohamed.medhat.photoweather.ui.BaseActivity
@@ -53,6 +51,9 @@ class PreviewActivity : BaseActivity() {
                     }
                 )
             }
+        }
+        previewViewModel.bitmap.observe(this) {
+            binding.imageView2.setImageBitmap(it)
         }
     }
 
