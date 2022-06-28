@@ -43,10 +43,6 @@ class PreviewViewModel @Inject constructor(
      * @param imagePath The path of the image to add the banner to.
      */
     fun applyImageWeatherBanner(imagePath: String) {
-        Log.d(
-            TAG,
-            "applyImageWeatherBanner: ${locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)}"
-        )
         if (isLocationEnabled()) {
             onLocationEnabled(imagePath)
         } else {
@@ -76,6 +72,7 @@ class PreviewViewModel @Inject constructor(
                 Log.d(TAG, "location: ${it.latitude},${it.longitude}")
                 // TODO call the repository to get the location!
             } else {
+                Log.e(TAG, "onLocationEnabled: location is null")
                 announceErrorState(context.getString(R.string.null_location_message))
             }
         }
