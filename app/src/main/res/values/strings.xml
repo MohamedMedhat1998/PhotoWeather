@@ -1,4 +1,19 @@
 <resources>
     <string name="app_name">PhotoWeather</string>
     <string name="capture_fab_content_description">Take a photo</string>
+    <string name="requesting_permissions_title">Permissions needed!</string>
+    <string name="requesting_permissions_cancel">Cancel</string>
+    <string name="requesting_permissions_ok">OK</string>
+    <string name="requesting_permissions_message">"The following permissions are required to continue:\n%s</string>
+    <string name="permission_denied_title">Can\'t proceed without permissions!</string>
+    <string name="permission_denied_message">The requested functionality can\'t run without the required permissions</string>
+    <string name="permissions_denied_ok">OK</string>
+    <string name="location_permission_friendly_name">Location</string>
+    <string name="turn_gps_on_title">GPS is required</string>
+    <string name="turn_gps_on_message">The app needs to turn the gps on to continue.</string>
+    <string name="turn_gps_on_ok">OK</string>
+    <string name="turn_gps_on_cancel">Cancel</string>
+    <string name="null_image_path_message">Something went wrong, couldn\'t find the captured image!</string>
+    <string name="gps_was_not_open_message">GPS is turned off, please turn it on and retry.</string>
+    <string name="null_location_message">Something went wrong while getting the location!</string>
 </resources>

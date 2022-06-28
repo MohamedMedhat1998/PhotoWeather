@@ -1,20 +1,22 @@
 package com.mohamed.medhat.photoweather.ui.main
 
 import android.app.Activity
-import android.net.Uri
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import com.mohamed.medhat.photoweather.databinding.ActivityMainBinding
+import com.mohamed.medhat.photoweather.ui.BaseActivity
+import com.mohamed.medhat.photoweather.ui.preview.PreviewActivity
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
+
+const val IMAGE_PATH = "image-path"
 
 /**
  * The main screen of the app.
  */
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val mainViewModel: MainViewModel by viewModels()
@@ -24,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initViews()
+        registerObservers()
     }
 
     /**
@@ -31,17 +34,31 @@ class MainActivity : AppCompatActivity() {
      */
     private fun initViews() {
         binding.fabMainTakePhoto.setOnClickListener {
-            mainViewModel.sendTakePhotoIntent(cameraResultLauncher, this)
+            mainViewModel.sendTakePhotoIntent()
         }
     }
 
     /**
-     * Camera result callback (onActivityResult) alternative.
+     * Subscribes to the observable fields in the [mainViewModel].
+     */
+    private fun registerObservers() {
+        mainViewModel.cameraIntent.observe(this) {
+            if (mainViewModel.canOpenCamera) {
+                mainViewModel.canOpenCamera = false
+                cameraResultLauncher.launch(it)
+            }
+        }
+    }
+
+    /**
+     * Camera result callback. (onActivityResult) alternative.
      */
     private val cameraResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                // TODO navigate to image modification activity.
+                startActivity(Intent(this, PreviewActivity::class.java).apply {
+                    putExtra(IMAGE_PATH, mainViewModel.latestImageLocation)
+                })
             }
         }
 }
