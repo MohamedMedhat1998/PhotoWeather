@@ -7,13 +7,17 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
 import com.mohamed.medhat.photoweather.R
+import com.mohamed.medhat.photoweather.di.MainRepo
 import com.mohamed.medhat.photoweather.model.StateHolder
+import com.mohamed.medhat.photoweather.repository.Repository
 import com.mohamed.medhat.photoweather.utils.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val TAG = "PreviewViewModel"
@@ -26,7 +30,8 @@ private const val TAG = "PreviewViewModel"
 class PreviewViewModel @Inject constructor(
     private val locationManager: LocationManager,
     private val fusedLocationProviderClient: FusedLocationProviderClient,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    @MainRepo private val repository: Repository
 ) : ViewModel() {
 
     private val _openLocationRequest = MutableLiveData(false)
@@ -70,7 +75,14 @@ class PreviewViewModel @Inject constructor(
         getLocationTask.addOnSuccessListener {
             if (it != null) {
                 Log.d(TAG, "location: ${it.latitude},${it.longitude}")
-                // TODO call the repository to get the location!
+                viewModelScope.launch {
+                    val weatherData = repository.getWeatherData(it.latitude, it.longitude)
+                    if (weatherData != null) {
+                        Log.d(TAG, "onLocationEnabled: $weatherData")
+                    } else {
+                        announceErrorState(context.getString(R.string.weather_response_error))
+                    }
+                }
             } else {
                 Log.e(TAG, "onLocationEnabled: location is null")
                 announceErrorState(context.getString(R.string.null_location_message))
