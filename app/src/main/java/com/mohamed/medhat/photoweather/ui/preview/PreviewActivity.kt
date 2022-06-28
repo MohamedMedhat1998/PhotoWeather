@@ -23,31 +23,16 @@ private const val TAG = "PreviewActivity"
 @AndroidEntryPoint
 class PreviewActivity : BaseActivity() {
     private lateinit var binding: ActivityPreviewBinding
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private val previewViewModel: PreviewViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPreviewBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         registerObservers()
-
         if (savedInstanceState == null) {
             addWeatherBanner()
         }
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-//        val t = fusedLocationProviderClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null)
-//        t.addOnSuccessListener {
-//            Log.d(TAG, "onCreate: ${it.latitude}:${it.longitude}")
-//        }
-//        t.addOnFailureListener {
-//            it.printStackTrace()
-//        }
-//        t.addOnCanceledListener {
-//            Log.d(TAG, "onCreate: cancelled!")
-//        }
     }
 
     /**

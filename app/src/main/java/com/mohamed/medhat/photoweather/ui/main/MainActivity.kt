@@ -26,6 +26,7 @@ class MainActivity : BaseActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initViews()
+        registerObservers()
     }
 
     /**
@@ -33,7 +34,19 @@ class MainActivity : BaseActivity() {
      */
     private fun initViews() {
         binding.fabMainTakePhoto.setOnClickListener {
-            mainViewModel.sendTakePhotoIntent(cameraResultLauncher)
+            mainViewModel.sendTakePhotoIntent()
+        }
+    }
+
+    /**
+     * Subscribes to the observable fields in the [mainViewModel].
+     */
+    private fun registerObservers() {
+        mainViewModel.cameraIntent.observe(this) {
+            if (mainViewModel.canOpenCamera) {
+                mainViewModel.canOpenCamera = false
+                cameraResultLauncher.launch(it)
+            }
         }
     }
 
