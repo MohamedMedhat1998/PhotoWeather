@@ -6,7 +6,10 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.mohamed.medhat.photoweather.networking.WeatherAuthenticator
 import com.mohamed.medhat.photoweather.networking.WebApi
+import com.mohamed.medhat.photoweather.repository.MainRepository
+import com.mohamed.medhat.photoweather.repository.Repository
 import com.mohamed.medhat.photoweather.utils.Constants
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +19,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 /**
@@ -60,3 +64,18 @@ object Providers {
         return retrofit.create(WebApi::class.java)
     }
 }
+
+/**
+ * Tells hilt how to provide some dependencies.
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class Binders {
+    @MainRepo
+    @Binds
+    abstract fun bindRepository(mainRepository: MainRepository): Repository
+}
+
+@Qualifier
+@Retention(AnnotationRetention.SOURCE)
+annotation class MainRepo
