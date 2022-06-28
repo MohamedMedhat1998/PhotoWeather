@@ -85,6 +85,7 @@ class PreviewViewModel @Inject constructor(
                     val weatherData = repository.getWeatherData(it.latitude, it.longitude)
                     if (weatherData != null) {
                         _bitmap.postValue(photoEditor.addWeatherBanner(weatherData, imagePath))
+                        _state.postValue(StateHolder(State.STATE_NORMAL))
                     } else {
                         announceErrorState(context.getString(R.string.weather_response_error))
                     }
@@ -104,7 +105,7 @@ class PreviewViewModel @Inject constructor(
      * Updates the value of the state to [State.STATE_ERROR].
      * @param message The error message to use.
      */
-    private fun announceErrorState(message: String) {
+    fun announceErrorState(message: String) {
         _state.postValue(StateHolder(State.STATE_ERROR, message))
     }
 }

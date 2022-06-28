@@ -17,4 +17,6 @@
     <string name="gps_was_not_open_message">GPS is turned off, please turn it on and retry.</string>
     <string name="null_location_message">Something went wrong while getting the location!</string>
     <string name="weather_response_error">Something went wrong while getting weather data!</string>
+    <string name="button_share">Share</string>
+    <string name="button_retry">Retry</string>
 </resources>
