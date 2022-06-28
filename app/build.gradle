@@ -50,4 +50,6 @@ dependencies {
     kapt "com.google.dagger:hilt-compiler:2.40"
     // Activity ktx
     implementation "androidx.activity:activity-ktx:1.4.0"
+    // Google play services
+    implementation 'com.google.android.gms:play-services-location:20.0.0'
 }

@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">PhotoWeather</string>
     <string name="capture_fab_content_description">Take a photo</string>
+    <string name="requesting_permissions_title">Permissions needed!</string>
+    <string name="requesting_permissions_cancel">Cancel</string>
+    <string name="requesting_permissions_ok">OK</string>
+    <string name="requesting_permissions_message">"The following permissions are required to continue:\n%s</string>
+    <string name="permission_denied_title">Can\'t proceed without permissions!</string>
+    <string name="permission_denied_message">The requested functionality can\'t run without the required permissions</string>
+    <string name="permissions_denied_ok">OK</string>
+    <string name="location_permission_friendly_name">Location</string>
 </resources>
