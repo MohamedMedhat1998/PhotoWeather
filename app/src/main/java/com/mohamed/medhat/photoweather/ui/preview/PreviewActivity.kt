@@ -74,7 +74,7 @@ class PreviewActivity : BaseActivity() {
      */
     private fun withLocationPermission(onLocationPermissionGranted: () -> Unit) {
         requirePermissions(
-            arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
             arrayOf(getString(R.string.location_permission_friendly_name))
         ) {
             onLocationPermissionGranted.invoke()
