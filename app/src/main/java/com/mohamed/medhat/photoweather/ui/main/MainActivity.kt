@@ -33,12 +33,12 @@ class MainActivity : BaseActivity() {
      */
     private fun initViews() {
         binding.fabMainTakePhoto.setOnClickListener {
-            mainViewModel.sendTakePhotoIntent(cameraResultLauncher, this)
+            mainViewModel.sendTakePhotoIntent(cameraResultLauncher)
         }
     }
 
     /**
-     * Camera result callback (onActivityResult) alternative.
+     * Camera result callback. (onActivityResult) alternative.
      */
     private val cameraResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->

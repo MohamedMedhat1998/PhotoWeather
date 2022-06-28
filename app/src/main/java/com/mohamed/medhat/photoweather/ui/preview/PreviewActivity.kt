@@ -1,22 +1,26 @@
 package com.mohamed.medhat.photoweather.ui.preview
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.provider.Settings
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
 import com.mohamed.medhat.photoweather.R
 import com.mohamed.medhat.photoweather.databinding.ActivityPreviewBinding
 import com.mohamed.medhat.photoweather.ui.BaseActivity
 import com.mohamed.medhat.photoweather.ui.main.IMAGE_PATH
+import dagger.hilt.android.AndroidEntryPoint
+
 
 private const val TAG = "PreviewActivity"
 
 /**
  * The activity where the user can preview the image to share.
  */
+@AndroidEntryPoint
 class PreviewActivity : BaseActivity() {
     private lateinit var binding: ActivityPreviewBinding
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -27,20 +31,43 @@ class PreviewActivity : BaseActivity() {
         binding = ActivityPreviewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        registerObservers()
+
         if (savedInstanceState == null) {
             addWeatherBanner()
         }
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        val t = fusedLocationProviderClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null)
-        t.addOnSuccessListener {
-            Log.d(TAG, "onCreate: ${it.latitude}:${it.longitude}")
-        }
-        t.addOnFailureListener {
-            it.printStackTrace()
-        }
-        t.addOnCanceledListener {
-            Log.d(TAG, "onCreate: cancelled!")
+//        val t = fusedLocationProviderClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null)
+//        t.addOnSuccessListener {
+//            Log.d(TAG, "onCreate: ${it.latitude}:${it.longitude}")
+//        }
+//        t.addOnFailureListener {
+//            it.printStackTrace()
+//        }
+//        t.addOnCanceledListener {
+//            Log.d(TAG, "onCreate: cancelled!")
+//        }
+    }
+
+    /**
+     * Subscribes to the observable fields in the [previewViewModel].
+     */
+    private fun registerObservers() {
+        previewViewModel.openLocationRequest.observe(this) {
+            if (it && previewViewModel.shouldOpenLocationSettings) {
+                previewViewModel.shouldOpenLocationSettings = false
+                showAlertDialog(
+                    title = getString(R.string.turn_gps_on_title),
+                    message = getString(R.string.turn_gps_on_message),
+                    positiveButtonLabel = getString(R.string.turn_gps_on_ok),
+                    negativeButtonLabel = getString(R.string.turn_gps_on_cancel),
+                    onPositiveButtonClicked = {
+                        val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                        locationResultLauncher.launch(intent)
+                    }
+                )
+            }
         }
     }
 
@@ -49,8 +76,8 @@ class PreviewActivity : BaseActivity() {
      */
     private fun addWeatherBanner() {
         withLocationPermission {
-            if (intent != null && intent.hasExtra(IMAGE_PATH)) {
-                previewViewModel.applyImageWeatherBanner(intent.getStringExtra(IMAGE_PATH)!!)
+            withImagePath {
+                previewViewModel.applyImageWeatherBanner(it)
             }
         }
     }
@@ -67,4 +94,30 @@ class PreviewActivity : BaseActivity() {
             onLocationPermissionGranted.invoke()
         }
     }
+
+    /**
+     * Proceeds with the passed lambda if the image path coming from the previous activity is found.
+     * @param onImagePathFound What to do with this path.
+     */
+    private fun withImagePath(onImagePathFound: (imagePath: String) -> Unit) {
+        if (intent != null && intent.hasExtra(IMAGE_PATH)) {
+            onImagePathFound.invoke(intent.getStringExtra(IMAGE_PATH)!!)
+        } else {
+            showToast(getString(R.string.null_image_path_message))
+        }
+    }
+
+    /**
+     * Location result callback. (onActivityResult) alternative.
+     */
+    private val locationResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (previewViewModel.isLocationEnabled()) {
+                withImagePath { imagePath ->
+                    previewViewModel.onLocationEnabled(imagePath)
+                }
+            } else {
+                showToast(getString(R.string.gps_was_not_open_message))
+            }
+        }
 }

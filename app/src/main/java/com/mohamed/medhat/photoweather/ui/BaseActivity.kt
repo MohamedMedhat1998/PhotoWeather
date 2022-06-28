@@ -1,9 +1,11 @@
 package com.mohamed.medhat.photoweather.ui
 
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.BaseTransientBottomBar.Duration
 import com.mohamed.medhat.photoweather.R
 
 const val REQUEST_PERMISSIONS_REQUEST_CODE = 2
@@ -43,7 +45,7 @@ open class BaseActivity : AppCompatActivity() {
                 onPermissionsGranted.invoke()
             }
             permissions.any { shouldShowRequestPermissionRationale(it) } -> {
-                showDialog(
+                showAlertDialog(
                     title = getString(R.string.requesting_permissions_title),
                     message = getString(
                         R.string.requesting_permissions_message,
@@ -71,9 +73,15 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     /**
-     * Displays a dialog to the user.
+     * Safely Displays a dialog to the user without leaking the window on configuration changes.
+     * @param title The title of the dialog.
+     * @param message The message of the dialog.
+     * @param positiveButtonLabel The text on the positive button.
+     * @param negativeButtonLabel The text on the negative button. Leave it empty to delete the negative button.
+     * @param onPositiveButtonClicked A Lambda executed when the positive button is clicked.
+     * @param onNegativeButtonClicked A Lambda executed when the negative button is clicked.
      */
-    private fun showDialog(
+    fun showAlertDialog(
         title: String,
         message: String,
         positiveButtonLabel: String,
@@ -109,13 +117,22 @@ open class BaseActivity : AppCompatActivity() {
             if ((grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED })) {
                 onPermissionsGranted.invoke()
             } else {
-                showDialog(
+                showAlertDialog(
                     title = getString(R.string.permission_denied_title),
                     message = getString(R.string.permission_denied_message),
                     positiveButtonLabel = getString(R.string.permissions_denied_ok)
                 )
             }
         }
+    }
+
+    /**
+     * Displays a toast message to the user.
+     * @param message The toast text content.
+     * @param duration The duration the toast should last.
+     */
+    fun showToast(message: String, @Duration duration: Int = Toast.LENGTH_LONG) {
+        Toast.makeText(this, message, duration).show()
     }
 
     override fun onDestroy() {
