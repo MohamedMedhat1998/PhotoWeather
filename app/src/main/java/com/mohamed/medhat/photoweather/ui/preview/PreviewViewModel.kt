@@ -2,6 +2,7 @@ package com.mohamed.medhat.photoweather.ui.preview
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.location.LocationManager
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -14,6 +15,7 @@ import com.mohamed.medhat.photoweather.R
 import com.mohamed.medhat.photoweather.di.MainRepo
 import com.mohamed.medhat.photoweather.model.StateHolder
 import com.mohamed.medhat.photoweather.repository.Repository
+import com.mohamed.medhat.photoweather.utils.PhotoEditor
 import com.mohamed.medhat.photoweather.utils.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,7 +33,8 @@ class PreviewViewModel @Inject constructor(
     private val locationManager: LocationManager,
     private val fusedLocationProviderClient: FusedLocationProviderClient,
     @ApplicationContext private val context: Context,
-    @MainRepo private val repository: Repository
+    @MainRepo private val repository: Repository,
+    private val photoEditor: PhotoEditor
 ) : ViewModel() {
 
     private val _openLocationRequest = MutableLiveData(false)
@@ -42,6 +45,9 @@ class PreviewViewModel @Inject constructor(
 
     private val _state = MutableLiveData<StateHolder>()
     val state: LiveData<StateHolder> = _state
+
+    private val _bitmap = MutableLiveData<Bitmap>()
+    val bitmap: LiveData<Bitmap> = _bitmap
 
     /**
      * Adds a weather banner overlay to the image whose path is passed to this function.
@@ -78,7 +84,7 @@ class PreviewViewModel @Inject constructor(
                 viewModelScope.launch {
                     val weatherData = repository.getWeatherData(it.latitude, it.longitude)
                     if (weatherData != null) {
-                        Log.d(TAG, "onLocationEnabled: $weatherData")
+                        _bitmap.postValue(photoEditor.addWeatherBanner(weatherData, imagePath))
                     } else {
                         announceErrorState(context.getString(R.string.weather_response_error))
                     }
