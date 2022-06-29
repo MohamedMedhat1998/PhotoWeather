@@ -2,13 +2,17 @@ package com.mohamed.medhat.photoweather.di
 
 import android.content.Context
 import android.location.LocationManager
+import androidx.room.Room
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.mohamed.medhat.photoweather.local.AppDatabase
+import com.mohamed.medhat.photoweather.local.HistoryDao
 import com.mohamed.medhat.photoweather.networking.WeatherAuthenticator
 import com.mohamed.medhat.photoweather.networking.WebApi
 import com.mohamed.medhat.photoweather.repository.MainRepository
 import com.mohamed.medhat.photoweather.repository.Repository
 import com.mohamed.medhat.photoweather.utils.Constants
+import com.mohamed.medhat.photoweather.utils.Constants.DATABASE_NAME
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -62,6 +66,18 @@ object Providers {
     @Provides
     fun provideWebApi(retrofit: Retrofit): WebApi {
         return retrofit.create(WebApi::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(context, AppDatabase::class.java, DATABASE_NAME).build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideHistoryDao(appDatabase: AppDatabase): HistoryDao {
+        return appDatabase.historyDao()
     }
 }
 

@@ -3,6 +3,7 @@ package com.mohamed.medhat.photoweather.ui.main
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import com.mohamed.medhat.photoweather.databinding.ActivityMainBinding
@@ -11,6 +12,7 @@ import com.mohamed.medhat.photoweather.ui.preview.PreviewActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 const val IMAGE_PATH = "image-path"
+private const val TAG = "MainActivity"
 
 /**
  * The main screen of the app.
@@ -47,6 +49,9 @@ class MainActivity : BaseActivity() {
                 mainViewModel.canOpenCamera = false
                 cameraResultLauncher.launch(it)
             }
+        }
+        mainViewModel.history.observe(this) {
+            Log.d(TAG, "registerObservers: history: $it")
         }
     }
 

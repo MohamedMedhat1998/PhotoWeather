@@ -102,7 +102,9 @@ class PreviewViewModel @Inject constructor(
                 viewModelScope.launch {
                     val weatherData = repository.getWeatherData(it.latitude, it.longitude)
                     if (weatherData != null) {
-                        _bitmap.postValue(photoEditor.addWeatherBanner(weatherData, imagePath))
+                        val bmp = photoEditor.addWeatherBanner(weatherData, imagePath)
+                        repository.saveImageToHistory(bmp, imagePath)
+                        _bitmap.postValue(bmp)
                         _state.postValue(StateHolder(State.STATE_NORMAL))
                     } else {
                         announceErrorState(context.getString(R.string.weather_response_error))
@@ -133,24 +135,17 @@ class PreviewViewModel @Inject constructor(
      */
     fun shareImage(imagePath: String) {
         val photoFile = File(imagePath)
-        val outputStream = FileOutputStream(photoFile)
-        if (bitmap.value?.compress(Bitmap.CompressFormat.PNG, 100, outputStream) == true) {
-            // TODO save the image in the history.
-            canShareImage = true
-            val photoURI =
-                FileProvider.getUriForFile(
-                    context,
-                    "com.mohamed.medhat.photoweather.fileprovider",
-                    photoFile
-                )
-            val intent = Intent()
-            intent.action = Intent.ACTION_SEND
-            intent.type = "image/*"
-            intent.putExtra(Intent.EXTRA_STREAM, photoURI)
-            _shareIntent.postValue(Pair(intent, photoURI))
-        } else {
-            canShowToast = true
-            _toastMessage.postValue(context.getString(R.string.share_image_error))
-        }
+        canShareImage = true
+        val photoURI =
+            FileProvider.getUriForFile(
+                context,
+                "com.mohamed.medhat.photoweather.fileprovider",
+                photoFile
+            )
+        val intent = Intent()
+        intent.action = Intent.ACTION_SEND
+        intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_STREAM, photoURI)
+        _shareIntent.postValue(Pair(intent, photoURI))
     }
 }

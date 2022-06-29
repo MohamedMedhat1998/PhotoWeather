@@ -9,6 +9,9 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.mohamed.medhat.photoweather.di.MainRepo
+import com.mohamed.medhat.photoweather.model.HistoryItem
+import com.mohamed.medhat.photoweather.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -21,8 +24,10 @@ import javax.inject.Inject
  */
 @SuppressLint("StaticFieldLeak") // Suppressed as it is fine to use the application context in the ViewModel.
 @HiltViewModel
-class MainViewModel @Inject constructor(@ApplicationContext private val context: Context) :
-    ViewModel() {
+class MainViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    @MainRepo private val repository: Repository
+) : ViewModel() {
 
     var latestImageLocation = ""
 
@@ -31,6 +36,8 @@ class MainViewModel @Inject constructor(@ApplicationContext private val context:
 
     private val _cameraIntent = MutableLiveData<Intent>()
     val cameraIntent: LiveData<Intent> = _cameraIntent
+
+    val history: LiveData<List<HistoryItem>> = repository.getHistoryItems()
 
     /**
      * Takes a photo using the device's camera.
