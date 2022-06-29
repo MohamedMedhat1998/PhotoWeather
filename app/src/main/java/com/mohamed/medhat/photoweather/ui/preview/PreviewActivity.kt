@@ -2,7 +2,6 @@ package com.mohamed.medhat.photoweather.ui.preview
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
@@ -109,26 +108,7 @@ class PreviewActivity : BaseActivity() {
         previewViewModel.shareIntent.observe(this) {
             if (previewViewModel.canShareImage) {
                 previewViewModel.canShareImage = false
-                val shareIntent = Intent.createChooser(it.first, "Share Image")
-                val resInfoList = packageManager.queryIntentActivities(
-                    shareIntent,
-                    PackageManager.MATCH_ALL
-                )
-                for (resolveInfo in resInfoList) {
-                    val packageName = resolveInfo.activityInfo.packageName
-                    grantUriPermission(
-                        packageName,
-                        it.second,
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                }
-                startActivity(shareIntent)
-            }
-        }
-        previewViewModel.toastMessage.observe(this) {
-            if (previewViewModel.canShowToast) {
-                previewViewModel.canShowToast = false
-                showToast(it)
+                shareImage(it.first, it.second)
             }
         }
     }

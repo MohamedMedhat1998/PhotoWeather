@@ -2,7 +2,6 @@ package com.mohamed.medhat.photoweather.ui.main
 
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
@@ -74,20 +73,7 @@ class MainActivity : BaseActivity() {
         mainViewModel.shareIntent.observe(this) {
             if (mainViewModel.canShareImage) {
                 mainViewModel.canShareImage = false
-                val shareIntent = Intent.createChooser(it.first, "Share Image")
-                val resInfoList = packageManager.queryIntentActivities(
-                    shareIntent,
-                    PackageManager.MATCH_ALL
-                )
-                for (resolveInfo in resInfoList) {
-                    val packageName = resolveInfo.activityInfo.packageName
-                    grantUriPermission(
-                        packageName,
-                        it.second,
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                }
-                startActivity(shareIntent)
+                shareImage(it.first, it.second)
             }
         }
     }
