@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.location.LocationManager
 import android.net.Uri
 import android.util.Log
-import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,11 +19,10 @@ import com.mohamed.medhat.photoweather.model.StateHolder
 import com.mohamed.medhat.photoweather.repository.Repository
 import com.mohamed.medhat.photoweather.utils.PhotoEditor
 import com.mohamed.medhat.photoweather.utils.State
+import com.mohamed.medhat.photoweather.utils.createShareImageIntent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 import javax.inject.Inject
 
 
@@ -134,18 +132,7 @@ class PreviewViewModel @Inject constructor(
      * @param imagePath The old image path to replace.
      */
     fun shareImage(imagePath: String) {
-        val photoFile = File(imagePath)
         canShareImage = true
-        val photoURI =
-            FileProvider.getUriForFile(
-                context,
-                "com.mohamed.medhat.photoweather.fileprovider",
-                photoFile
-            )
-        val intent = Intent()
-        intent.action = Intent.ACTION_SEND
-        intent.type = "image/*"
-        intent.putExtra(Intent.EXTRA_STREAM, photoURI)
-        _shareIntent.postValue(Pair(intent, photoURI))
+        _shareIntent.postValue(createShareImageIntent(context, imagePath))
     }
 }

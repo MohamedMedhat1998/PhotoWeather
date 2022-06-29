@@ -3,6 +3,7 @@ package com.mohamed.medhat.photoweather.ui.main
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
@@ -12,6 +13,7 @@ import androidx.lifecycle.ViewModel
 import com.mohamed.medhat.photoweather.di.MainRepo
 import com.mohamed.medhat.photoweather.model.HistoryItem
 import com.mohamed.medhat.photoweather.repository.Repository
+import com.mohamed.medhat.photoweather.utils.createShareImageIntent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -34,8 +36,14 @@ class MainViewModel @Inject constructor(
     // Introduced to prevent the activity from automatically open the camera on each configuration change
     var canOpenCamera = false
 
+    // Introduced to prevent the activity from automatically sharing the image
+    var canShareImage = false
+
     private val _cameraIntent = MutableLiveData<Intent>()
     val cameraIntent: LiveData<Intent> = _cameraIntent
+
+    private val _shareIntent = MutableLiveData<Pair<Intent, Uri>>()
+    val shareIntent: LiveData<Pair<Intent, Uri>> = _shareIntent
 
     val history: LiveData<List<HistoryItem>> = repository.getHistoryItems()
 
@@ -58,5 +66,14 @@ class MainViewModel @Inject constructor(
         latestImageLocation = path
         canOpenCamera = true
         _cameraIntent.value = takePictureIntent
+    }
+
+    /**
+     * Shares the modified image.
+     * @param imagePath The old image path to replace.
+     */
+    fun shareImage(imagePath: String) {
+        canShareImage = true
+        _shareIntent.postValue(createShareImageIntent(context, imagePath))
     }
 }

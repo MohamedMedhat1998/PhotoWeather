@@ -19,6 +19,8 @@ import javax.inject.Inject
 class HistoryAdapter @Inject constructor() :
     ListAdapter<HistoryItem, HistoryAdapter.HistoryItemHolder>(HistoryItemsDiffUtilsCallback) {
 
+    var onItemClicked: (HistoryItem) -> Unit = {}
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryItemHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_history, parent, false)
         return HistoryItemHolder(view)
@@ -31,8 +33,14 @@ class HistoryAdapter @Inject constructor() :
     /**
      * Represents a single [HistoryItem] in the recycler view.
      */
-    class HistoryItemHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class HistoryItemHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val binding = ItemHistoryBinding.bind(itemView)
+
+        init {
+            binding.root.setOnClickListener {
+                onItemClicked.invoke(currentList[adapterPosition])
+            }
+        }
 
         /**
          * Binds a single [HistoryItem] to the UI.
