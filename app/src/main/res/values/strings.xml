@@ -20,4 +20,5 @@
     <string name="button_share">Share</string>
     <string name="button_retry">Retry</string>
     <string name="share_image_error">Something went wrong!</string>
+    <string name="empty_history_message">No history items found</string>
 </resources>
