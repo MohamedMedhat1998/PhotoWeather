@@ -2,12 +2,9 @@ package com.mohamed.medhat.photoweather.ui.preview
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.location.LocationManager
-import android.net.Uri
 import android.util.Log
-import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,13 +15,12 @@ import com.mohamed.medhat.photoweather.R
 import com.mohamed.medhat.photoweather.di.MainRepo
 import com.mohamed.medhat.photoweather.model.StateHolder
 import com.mohamed.medhat.photoweather.repository.Repository
+import com.mohamed.medhat.photoweather.ui.BaseViewModel
 import com.mohamed.medhat.photoweather.utils.PhotoEditor
 import com.mohamed.medhat.photoweather.utils.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 import javax.inject.Inject
 
 
@@ -41,7 +37,7 @@ class PreviewViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     @MainRepo private val repository: Repository,
     private val photoEditor: PhotoEditor
-) : ViewModel() {
+) : BaseViewModel(context) {
 
     private val _openLocationRequest = MutableLiveData(false)
     val openLocationRequest: LiveData<Boolean> = _openLocationRequest
@@ -49,23 +45,8 @@ class PreviewViewModel @Inject constructor(
     // Introduced to prevent the activity from automatically open the location settings on each configuration change
     var shouldOpenLocationSettings = false
 
-    // Introduced to prevent the activity from automatically sharing the image
-    var canShareImage = false
-
-    // Introduced to prevent the activity from automatically showing a toast
-    var canShowToast = false
-
-    private val _state = MutableLiveData<StateHolder>()
-    val state: LiveData<StateHolder> = _state
-
     private val _bitmap = MutableLiveData<Bitmap>()
     val bitmap: LiveData<Bitmap> = _bitmap
-
-    private val _shareIntent = MutableLiveData<Pair<Intent, Uri>>()
-    val shareIntent: LiveData<Pair<Intent, Uri>> = _shareIntent
-
-    private val _toastMessage = MutableLiveData<String>()
-    val toastMessage: LiveData<String> = _toastMessage
 
     /**
      * Adds a weather banner overlay to the image whose path is passed to this function.
@@ -75,6 +56,7 @@ class PreviewViewModel @Inject constructor(
         if (isLocationEnabled()) {
             onLocationEnabled(imagePath)
         } else {
+            announceErrorState(context.getString(R.string.gps_was_not_open_message))
             shouldOpenLocationSettings = true
             _openLocationRequest.value = true
         }
@@ -93,7 +75,7 @@ class PreviewViewModel @Inject constructor(
      */
     @SuppressLint("MissingPermission") // Suppressed as the location permission was granted before.
     fun onLocationEnabled(imagePath: String) {
-        _state.postValue(StateHolder(State.STATE_LOADING))
+        setState(StateHolder(State.STATE_LOADING))
         val getLocationTask =
             fusedLocationProviderClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null)
         getLocationTask.addOnSuccessListener {
@@ -105,7 +87,7 @@ class PreviewViewModel @Inject constructor(
                         val bmp = photoEditor.addWeatherBanner(weatherData, imagePath)
                         repository.saveImageToHistory(bmp, imagePath)
                         _bitmap.postValue(bmp)
-                        _state.postValue(StateHolder(State.STATE_NORMAL))
+                        setState(StateHolder(State.STATE_NORMAL))
                     } else {
                         announceErrorState(context.getString(R.string.weather_response_error))
                     }
@@ -119,33 +101,5 @@ class PreviewViewModel @Inject constructor(
             it.printStackTrace()
             announceErrorState(context.getString(R.string.null_location_message))
         }
-    }
-
-    /**
-     * Updates the value of the state to [State.STATE_ERROR].
-     * @param message The error message to use.
-     */
-    fun announceErrorState(message: String) {
-        _state.postValue(StateHolder(State.STATE_ERROR, message))
-    }
-
-    /**
-     * Shares the modified image.
-     * @param imagePath The old image path to replace.
-     */
-    fun shareImage(imagePath: String) {
-        val photoFile = File(imagePath)
-        canShareImage = true
-        val photoURI =
-            FileProvider.getUriForFile(
-                context,
-                "com.mohamed.medhat.photoweather.fileprovider",
-                photoFile
-            )
-        val intent = Intent()
-        intent.action = Intent.ACTION_SEND
-        intent.type = "image/*"
-        intent.putExtra(Intent.EXTRA_STREAM, photoURI)
-        _shareIntent.postValue(Pair(intent, photoURI))
     }
 }

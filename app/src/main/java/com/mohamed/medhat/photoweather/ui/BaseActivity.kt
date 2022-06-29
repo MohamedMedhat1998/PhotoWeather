@@ -1,6 +1,8 @@
 package com.mohamed.medhat.photoweather.ui
 
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -138,11 +140,33 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     /**
+     * Shares an image.
+     * @param intent The original intent from which a chooser will be created
+     * @param uri The uri of the resource to share.
+     */
+    fun shareImage(intent: Intent, uri: Uri) {
+        try {
+            val shareIntent = Intent.createChooser(intent, "Share Image")
+            val packageName =
+                packageManager.resolveActivity(shareIntent, 0)?.activityInfo?.packageName
+            grantUriPermission(
+                packageName,
+                uri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            startActivity(shareIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            showToast(getString(R.string.no_share_apps_error))
+        }
+    }
+
+    /**
      * Displays a toast message to the user.
      * @param message The toast text content.
      * @param duration The duration the toast should last.
      */
-    fun showToast(message: String, @Duration duration: Int = Toast.LENGTH_LONG) {
+    private fun showToast(message: String, @Duration duration: Int = Toast.LENGTH_LONG) {
         Toast.makeText(this, message, duration).show()
     }
 

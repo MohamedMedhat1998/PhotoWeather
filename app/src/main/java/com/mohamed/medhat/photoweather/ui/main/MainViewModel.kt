@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import com.mohamed.medhat.photoweather.di.MainRepo
 import com.mohamed.medhat.photoweather.model.HistoryItem
 import com.mohamed.medhat.photoweather.repository.Repository
+import com.mohamed.medhat.photoweather.ui.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -27,7 +28,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     @MainRepo private val repository: Repository
-) : ViewModel() {
+) : BaseViewModel(context) {
 
     var latestImageLocation = ""
 

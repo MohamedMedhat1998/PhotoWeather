@@ -45,6 +45,9 @@ class MainActivity : BaseActivity() {
         }
         binding.rvMainHistory.layoutManager = LinearLayoutManager(this)
         binding.rvMainHistory.adapter = historyAdapter
+        historyAdapter.onItemClicked = {
+            mainViewModel.shareImage(it.imagePath)
+        }
     }
 
     /**
@@ -66,6 +69,12 @@ class MainActivity : BaseActivity() {
                 binding.tvMainNoHistory.visibility = View.INVISIBLE
             }
             historyAdapter.submitList(it)
+        }
+        mainViewModel.shareIntent.observe(this) {
+            if (mainViewModel.canShareImage) {
+                mainViewModel.canShareImage = false
+                shareImage(it.first, it.second)
+            }
         }
     }
 
