@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.mohamed.medhat.photoweather.R
 import com.mohamed.medhat.photoweather.databinding.ItemHistoryBinding
 import com.mohamed.medhat.photoweather.model.HistoryItem
 import java.io.File
@@ -19,7 +20,7 @@ class HistoryAdapter @Inject constructor() :
     ListAdapter<HistoryItem, HistoryAdapter.HistoryItemHolder>(HistoryItemsDiffUtilsCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryItemHolder {
-        val view = ItemHistoryBinding.inflate(LayoutInflater.from(parent.context)).root
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_history, parent, false)
         return HistoryItemHolder(view)
     }
 
